@@ -1,20 +1,10 @@
 /**
- * @fileoverview A classe BuscapeAPI foi criada para ajudar no desenvolvimento
- *               de aplicações usando os webservices disponibilizados pela API
- *               do BuscaPé.
- *
- * Os métodos desta classe tem os mesmos nomes dos serviços disponibilizados
- * pelo BuscaPé.
- *
  * @author João Batista Neto
  * @version 0.0.1
  * @license GNU Lesser General Public License Version 2.1, February 1999
  */
-
+'use strict';
 /**
- * A cada instância criada deverá ser passado como parâmetro obrigatório o id da
- * aplicação. O Source ID não é obrigatório
- *
  * @constructor
  * @param {String}
  *            applicationId
@@ -23,44 +13,15 @@
  * @throws Caso
  *             o id da aplicação seja inválido
  */
-BuscapeAPI = function( applicationId , sourceId ) {
-	/**
-	 * Id da aplicação
-	 *
-	 * @type String
-	 */
+var BuscapeAPI = function (applicationId, sourceId) {
 	this.applicationId = '';
-
-	/**
-	 * Código do país
-	 *
-	 * @type String
-	 */
 	this.countryCode = 'BR';
-
-	/**
-	 * Ambiente do serviço
-	 *
-	 * @type String
-	 */
 	this.environment = 'bws';
-
-	/**
-	 * Formato de retorno padrão
-	 *
-	 * @type String
-	 */
 	this.format = 'json';
-
-	/**
-	 * Source id
-	 *
-	 * @type String
-	 */
 	this.sourceId = '';
 
-	this.setApplicationId( applicationId );
-	this.setSourceId( sourceId );
+	this.setApplicationId(applicationId);
+	this.setSourceId(sourceId);
 };
 
 /**
@@ -69,8 +30,8 @@ BuscapeAPI = function( applicationId , sourceId ) {
  * @param {Object}
  *            JSON correspondente a resposta da chamada efetuada
  */
-BuscapeAPI.receiveContent = function( result ) {
-	BuscapeAPI.bpObject.receiveContent( result );
+BuscapeAPI.receiveContent = function (result) {
+	BuscapeAPI.bpObject.receiveContent(result);
 };
 
 /**
@@ -79,7 +40,7 @@ BuscapeAPI.receiveContent = function( result ) {
  * @param {Object}
  *            JSON correspondente a resposta da chamada efetuada
  */
-BuscapeAPI.prototype.receiveContent = function( result ) {
+BuscapeAPI.prototype.receiveContent = function (result) {
 };
 
 /**
@@ -94,40 +55,27 @@ BuscapeAPI.prototype.receiveContent = function( result ) {
  * @private
  * @return {String} Dados de retorno da URL requisitada
  */
-BuscapeAPI.prototype._getContent = function( serviceName , args , lomadee ) {
+BuscapeAPI.prototype._getContent = function (serviceName, args, lomadee) {
 	var params = '';
 
-	if ( lomadee ) {
-		serviceName += '/lomadee';
-	}
+	if (lomadee) serviceName += '/lomadee';
+	if (args === undefined) args = {};
+	if (this.sourceId.length > 0) args.sourceId = this.sourceId;
 
-	if ( args === undefined ) {
-		args = {};
-	}
-
-	if ( this.sourceId.length > 0 ) {
-		args.sourceId = this.sourceId;
-	}
-
-	if ( this.format == 'json' ) {
+	if (this.format == 'json') {
 		args.format = this.format;
-	
-		if ( args.callback !== undefined ) {
-			this.receiveContent = args.callback;
-		}
-	
+		if (args.callback !== undefined) this.receiveContent = args.callback;
 		args.callback = 'BuscapeAPI.receiveContent';
 	}
 
-	for ( var property in args ) {
-		params += [ params.length == 0 ? '?' : '&' , [ property , args[ property ] ].join( '=' ) ].join( '' );
-	}
+	for ( var property in args )
+		params += [params.length === 0 ? '?' : '&' ,[property, args[property]].join('=')].join('');
 
-	var url = [ 'http:/' , [ this.environment , 'buscape.com/service' ].join( '.' ) , serviceName , this.applicationId , this.countryCode , params ].join( '/' );
+	var url = ['http:/', [this.environment, 'buscape.com/service'].join('.'), serviceName, this.applicationId, this.countryCode, params].join('/');
 
 	BuscapeAPI.bpObject = this;
 
-	document.write( [ '<script type="text/javascript" src=' , url , '></script>' ].join( '"' ) );
+	document.write(['<script type="text/javascript" src=', url, '></script>'].join('"'));
 };
 
 /**
@@ -154,8 +102,8 @@ BuscapeAPI.prototype._getContent = function( serviceName , args , lomadee ) {
  *            args
  * @return {String} O sourceId
  */
-BuscapeAPI.prototype.createSourceId = function( args ) {
-	return this._getContent( 'createSource' , args , true );
+BuscapeAPI.prototype.createSourceId = function (args) {
+	return this._getContent('createSource', args, true);
 };
 
 /**
@@ -182,10 +130,8 @@ BuscapeAPI.prototype.createSourceId = function( args ) {
  * @throws Se
  *             o id da categoria for menor que zero.
  */
-BuscapeAPI.prototype.findCategoryList = function( args ) {
-	return this._getContent( 'findCategoryList' , this.validateParams( {
-		categoryId : 0
-	} , [] , [ 'categoryId' , 'keyword' ] ) , false );
+BuscapeAPI.prototype.findCategoryList = function (args) {
+	return this._getContent('findCategoryList', this.validateParams({categoryId : 0}, [], ['categoryId', 'keyword']), false);
 };
 
 /**
@@ -222,8 +168,8 @@ BuscapeAPI.prototype.findCategoryList = function( args ) {
  * @throws UnexpectedValueException
  *             Se a palavra chave for uma string vazia.
  */
-BuscapeAPI.prototype.findOfferList = function( args , lomadee ) {
-	return this._getContent( 'findOfferList' , this.validateParams( args , [] , [ 'categoryId' , 'productId' , 'keyword' ] ) , lomadee );
+BuscapeAPI.prototype.findOfferList = function (args, lomadee) {
+	return this._getContent('findOfferList', this.validateParams(args ,[] ,['categoryId', 'productId', 'keyword']), lomadee);
 };
 
 /**
@@ -256,8 +202,8 @@ BuscapeAPI.prototype.findOfferList = function( args , lomadee ) {
  * @throws Se
  *             a palavra chave for uma string vazia.
  */
-BuscapeAPI.prototype.findProductList = function( args , lomadee ) {
-	return this._getContent( 'findProductList' , this.validateParams( args , [] , [ 'categoryId' , 'keyword' ] ) , lomadee );
+BuscapeAPI.prototype.findProductList = function (args, lomadee) {
+	return this._getContent('findProductList', this.validateParams(args, [], ['categoryId', 'keyword']), lomadee);
 };
 
 /**
@@ -265,7 +211,7 @@ BuscapeAPI.prototype.findProductList = function( args , lomadee ) {
  *
  * @return {String}
  */
-BuscapeAPI.prototype.getApplicationId = function() {
+BuscapeAPI.prototype.getApplicationId = function () {
 	return this.applicationId;
 };
 
@@ -274,7 +220,7 @@ BuscapeAPI.prototype.getApplicationId = function() {
  *
  * @return {String}
  */
-BuscapeAPI.prototype.getCountryCode = function() {
+BuscapeAPI.prototype.getCountryCode = function () {
 	return this.countryCode;
 };
 
@@ -283,7 +229,7 @@ BuscapeAPI.prototype.getCountryCode = function() {
  *
  * @return {String}
  */
-BuscapeAPI.prototype.getEnvironment = function() {
+BuscapeAPI.prototype.getEnvironment = function () {
 	return this.environment;
 };
 
@@ -292,7 +238,7 @@ BuscapeAPI.prototype.getEnvironment = function() {
  *
  * @return {String}
  */
-BuscapeAPI.prototype.getFormat = function() {
+BuscapeAPI.prototype.getFormat = function () {
 	return this.format;
 };
 
@@ -301,7 +247,7 @@ BuscapeAPI.prototype.getFormat = function() {
  *
  * @return {String}
  */
-BuscapeAPI.prototype.getSourceId = function() {
+BuscapeAPI.prototype.getSourceId = function () {
 	return this.sourceId;
 };
 
@@ -313,15 +259,13 @@ BuscapeAPI.prototype.getSourceId = function() {
  * @throws Caso
  *             o ID da aplicação seja inválido
  */
-BuscapeAPI.prototype.setApplicationId = function( applicationId ) {
+BuscapeAPI.prototype.setApplicationId = function (applicationId) {
 	applicationId = applicationId + '';
 
-	if ( applicationId.split( ' ' ).join( '' ).length == 0 ) {
+	if (applicationId.split(' ').join('').length === 0)
 		throw 'Id da aplicação inválido';
-	}
-	else {
+	else
 		this.applicationId = applicationId;
-	}
 };
 
 /**
@@ -332,8 +276,8 @@ BuscapeAPI.prototype.setApplicationId = function( applicationId ) {
  * @throws Se
  *             o código do país não existir
  */
-BuscapeAPI.prototype.setCountryCode = function( countryCode ) {
-	switch ( countryCode ) {
+BuscapeAPI.prototype.setCountryCode = function (countryCode) {
+	switch (countryCode) {
 		case 'AR':
 		case 'BR':
 		case 'CL':
@@ -344,7 +288,7 @@ BuscapeAPI.prototype.setCountryCode = function( countryCode ) {
 			this.countryCode = countryCode;
 			break;
 		default:
-			throw [ 'Código do país' , countryCode , 'não existe' ].join( ' ' );
+			throw ['Código do país', countryCode, 'não existe'].join(' ');
 	}
 };
 
@@ -356,21 +300,21 @@ BuscapeAPI.prototype.setCountryCode = function( countryCode ) {
  * @throws Se
  *             o formato não existir
  */
-BuscapeAPI.prototype.setFormat = function( format ) {
-	switch ( format ) {
+BuscapeAPI.prototype.setFormat = function (format) {
+	switch (format) {
 		case 'xml':
 		case 'json':
 			this.format = format;
 			break;
 		default:
-			throw [ 'O formato de retorno' , format , 'não existe' ].join( ' ' );
+			throw ['O formato de retorno', format, 'não existe'].join(' ');
 	}
 };
 
 /**
  * Define se a integração vai ser feita no sandbox ou não
  */
-BuscapeAPI.prototype.setSandbox = function() {
+BuscapeAPI.prototype.setSandbox = function () {
 	this.environment = 'sandbox';
 };
 
@@ -380,7 +324,7 @@ BuscapeAPI.prototype.setSandbox = function() {
  * @param {String}
  *            sourceId
  */
-BuscapeAPI.prototype.setSourceId = function( sourceId ) {
+BuscapeAPI.prototype.setSourceId = function (sourceId) {
 	this.sourceId = sourceId;
 };
 
@@ -401,8 +345,8 @@ BuscapeAPI.prototype.setSourceId = function( sourceId ) {
  * @throws UnexpectedValueException
  *             Se o id da categoria for menor que zero.
  */
-BuscapeAPI.prototype.topProducts = function( args ) {
-	return this._getContent( 'topProducts' , this.validateParams( args ) );
+BuscapeAPI.prototype.topProducts = function (args) {
+	return this._getContent('topProducts', this.validateParams(args));
 };
 
 /**
@@ -422,63 +366,53 @@ BuscapeAPI.prototype.topProducts = function( args ) {
  * @throws Se
  *             nenhum dos parâmetros opcionais forem passados
  */
-BuscapeAPI.prototype.validateParams = function( args , and , or ) {
-	if ( args instanceof Object ) {
-		if ( args.keyword !== undefined ) {
-			args.keyword = [ args.keyword ].join( '' ).split( ' ' ).join( '' );
-		
-			if ( args.keyword.length == 0 ) {
+BuscapeAPI.prototype.validateParams = function (args ,and ,or) {
+	if (args instanceof Object) {
+		if (args.keyword !== undefined) {
+			args.keyword = [args.keyword].join('').split(' ').join('');
+			if (args.keyword.length === 0)
 				throw 'A palavra chave não pode ser uma string vazia';
-			}
 		}
-	
-		if ( args.categoryId !== undefined ) {
-			args.categoryId = args.categoryId instanceof Number ? args.categoryId : parseInt( args.categoryId );
-		
-			if ( isNaN( args.categoryId ) || args.categoryId < 0 ) {
+
+		if (args.categoryId !== undefined) {
+			args.categoryId = args.categoryId instanceof Number ? args.categoryId : parseInt(args.categoryId);
+			if (isNaN(args.categoryId) || args.categoryId < 0)
 				throw 'O id da categoria deve ser um número maior ou igual a zero';
-			}
 		}
-	
-		if ( args.productId !== undefined ) {
-			args.productId = args.productId instanceof Number ? args.productId : parseInt( args.productId );
-		
-			if ( isNaN( args.productId ) || args.productId < 0 ) {
+
+		if (args.productId !== undefined) {
+			args.productId = args.productId instanceof Number ? args.productId : parseInt(args.productId);
+			if (isNaN(args.productId) || args.productId < 0)
 				throw 'O id do produto deve ser um número maior ou igual a zero';
-			}
 		}
-	
-		if ( args.sellerId !== undefined ) {
-			args.sellerId = args.sellerId instanceof Number ? args.sellerId : parseInt( args.sellerId );
-		
-			if ( isNaN( args.sellerId ) || args.sellerId < 0 ) {
+
+		if (args.sellerId !== undefined) {
+			args.sellerId = args.sellerId instanceof Number ? args.sellerId : parseInt(args.sellerId);
+			if (isNaN(args.sellerId) || args.sellerId < 0)
 				throw 'O id da loja/empresa deve ser um número maior ou igual a zero';
-			}
 		}
-	
+
 		var i, t, f;
-	
-		if ( and !== undefined ) {
-			for ( i = 0 , t = and.length ; i < t ; ++i ) {
-				if ( args[ and[ i ] ] === undefined ) {
-					throw [ 'O parâmetro' , and[ i ] , 'é requerido' ].join( ' ' );
-				}
+
+		if (and !== undefined) {
+			for (i = 0, t = and.length; i < t; ++i) {
+				if (args[and[i]] === undefined)
+					throw ['O parâmetro', and[i], 'é requerido'].join(' ');
 			}
 		}
-	
-		if ( or !== undefined ) {
-			for ( i = 0 , t = or.length , f = 0 ; i < t ; ++i ) {
-				if ( args[ or[ i ] ] !== undefined ) {
+
+		if (or !== undefined) {
+			for (i = 0, t = or.length, f = 0; i < t; ++i) {
+				if (args[or[i]] !== undefined) {
 					++f;
 					break;
 				}
 			}
-		
-			if ( t != 0 && f == 0 ) {
-				throw [ 'Pelo menos um dos parâmetros: "' , or.join( '","' ) , '" devem ser passados' ].join( '' );
-			}
+
+			if (t !== 0 && f === 0)
+				throw ['Pelo menos um dos parâmetros: "', or.join('","'), '" devem ser passados'].join('');
 		}
-	
+
 		return args;
 	}
 };
@@ -502,8 +436,8 @@ BuscapeAPI.prototype.validateParams = function( args , and , or ) {
  * @throws Se
  *             o ID do produto não for passado
  */
-BuscapeAPI.prototype.viewProductDetails = function( args ) {
-	return this._getContent( 'viewProductDetails' , this.validateParams( args , [ 'productId' ] , [] ) , false );
+BuscapeAPI.prototype.viewProductDetails = function (args) {
+	return this._getContent('viewProductDetails', this.validateParams(args, ['productId'], []), false);
 };
 
 /**
@@ -526,8 +460,8 @@ BuscapeAPI.prototype.viewProductDetails = function( args ) {
  * @throws Se
  *             o ID da loja não for passado
  */
-BuscapeAPI.prototype.viewSellerDetails = function( args ) {
-	return this._getContent( 'viewSellerDetails' , this.validateParams( args , [ 'sellerId' ] , [] ) , false );
+BuscapeAPI.prototype.viewSellerDetails = function (args) {
+	return this._getContent('viewSellerDetails', this.validateParams(args, ['sellerId'], []), false);
 };
 
 /**
@@ -550,6 +484,6 @@ BuscapeAPI.prototype.viewSellerDetails = function( args ) {
  * @throws Se
  *             o ID do produto for menor que zero.
  */
-BuscapeAPI.prototype.viewUserRatings = function( args ) {
-	return this._getContent( 'viewUserRatings' , this.validateParams( args , [ 'productId' ] , [] ) , false );
+BuscapeAPI.prototype.viewUserRatings = function (args) {
+	return this._getContent('viewUserRatings', this.validateParams(args, ['productId'], []), false);
 };
